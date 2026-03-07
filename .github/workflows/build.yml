@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir -p www
           # In this specific case, the assets are already in www/ index.html and qrcode.min.js
-          npx cap copy
+          npx cap sync
 
       - name: Build with Gradle
         run: |
