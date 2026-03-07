@@ -123,6 +123,7 @@
             background: var(--header-bg);
             color: var(--header-text);
             padding: 12px 15px;
+            padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
             display: flex;
             align-items: center;
             position: fixed;
@@ -130,10 +131,10 @@
             width: 100%;
             z-index: 1000;
             box-shadow: var(--shadow);
-            height: 60px;
+            height: calc(env(safe-area-inset-top, 0px) + 60px);
         }
 
-        .menu-btn, .sales-btn, .fullscreen-btn {
+        .menu-btn, .sales-btn {
             font-size: 24px;
             cursor: pointer;
             margin-right: 15px;
@@ -149,7 +150,7 @@
             color: inherit;
         }
 
-        .menu-btn:hover, .sales-btn:hover, .fullscreen-btn:hover {
+        .menu-btn:hover, .sales-btn:hover {
             background: rgba(255,255,255,0.1);
         }
 
@@ -600,12 +601,12 @@
 
         /* Main content */
         .main-content {
-            margin-top: 60px;
+            margin-top: calc(env(safe-area-inset-top, 0px) + 60px);
             padding: 10px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            height: calc(100vh - 60px);
+            height: calc(100vh - (env(safe-area-inset-top, 0px) + 60px));
             overflow: hidden;
         }
 
@@ -760,7 +761,6 @@
         <div class="menu-btn" id="menuBtn">☰</div>
         <div class="sales-btn" id="salesBtn">📋</div>
         <h1>POS Pro</h1>
-        <button class="fullscreen-btn" id="fullscreenBtn">⛶</button>
     </div>
 
     <div class="sidebar" id="sidebar">
@@ -956,7 +956,6 @@
         // DOM elements
         const menuBtn = document.getElementById('menuBtn');
         const salesBtn = document.getElementById('salesBtn');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
         const sidebar = document.getElementById('sidebar');
         const sidebarContent = document.getElementById('sidebarContent');
         const overlay = document.getElementById('overlay');
@@ -1877,13 +1876,6 @@
         checkoutBtn.addEventListener('click', checkout);
         deleteBillBtn.addEventListener('click', deleteEntireBill);
         discountIcon.addEventListener('click', openDiscountModal);
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
-        });
 
         window.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal')) {
