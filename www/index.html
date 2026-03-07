@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>POS Pro - Date Grouped Sales</title>
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-sidebar: #ffffff;
+            --header-bg: #2c3e50;
+            --header-text: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --border-color: #e9ecef;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --card-bg: #f8f9fa;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Theme 1: Light (default) */
+        body.light {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-sidebar: #ffffff;
+            --header-bg: #2c3e50;
+            --header-text: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --border-color: #e9ecef;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --card-bg: #f8f9fa;
+        }
+
+        /* Theme 2: Dark */
+        body.dark {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-sidebar: #2d2d2d;
+            --header-bg: #000000;
+            --header-text: #ffffff;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: #404040;
+            --accent-color: #4a9eff;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --card-bg: #3d3d3d;
+        }
+
+        /* Theme 3: Blue */
+        body.blue {
+            --bg-primary: #e3f2fd;
+            --bg-secondary: #ffffff;
+            --bg-sidebar: #ffffff;
+            --header-bg: #1565c0;
+            --header-text: #ffffff;
+            --text-primary: #0d47a1;
+            --text-secondary: #1976d2;
+            --border-color: #bbdefb;
+            --accent-color: #2196f3;
+            --success-color: #43a047;
+            --danger-color: #e53935;
+            --card-bg: #e1f5fe;
+        }
+
+        /* Theme 4: Green */
+        body.green {
+            --bg-primary: #e8f5e9;
+            --bg-secondary: #ffffff;
+            --bg-sidebar: #ffffff;
+            --header-bg: #2e7d32;
+            --header-text: #ffffff;
+            --text-primary: #1b5e20;
+            --text-secondary: #388e3c;
+            --border-color: #c8e6c9;
+            --accent-color: #4caf50;
+            --success-color: #2e7d32;
+            --danger-color: #d32f2f;
+            --card-bg: #f1f8e9;
+        }
+
+        /* Theme 5: Purple */
+        body.purple {
+            --bg-primary: #f3e5f5;
+            --bg-secondary: #ffffff;
+            --bg-sidebar: #ffffff;
+            --header-bg: #6a1b9a;
+            --header-text: #ffffff;
+            --text-primary: #4a148c;
+            --text-secondary: #7b1fa2;
+            --border-color: #e1bee7;
+            --accent-color: #9c27b0;
+            --success-color: #6a1b9a;
+            --danger-color: #c2185b;
+            --card-bg: #f8f0fc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.2s, border-color 0.2s;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            height: 60px;
+        }
+
+        .menu-btn, .sales-btn, .fullscreen-btn {
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 15px;
+            padding: 8px 10px;
+            border-radius: 5px;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: inherit;
+        }
+
+        .menu-btn:hover, .sales-btn:hover, .fullscreen-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: var(--bg-sidebar);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            overflow-x: hidden;
+            transition: 0.3s;
+            z-index: 1001;
+            padding-top: 60px;
+        }
+
+        .sidebar.active {
+            width: 100%;
+        }
+
+        .sidebar-content {
+            padding: 15px;
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            color: var(--text-primary);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sidebar-header h2 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .back-btn, .net-sales-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 44px;
+        }
+
+        .net-sales-btn {
+            background: var(--success-color);
+        }
+
+        .action-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            margin-bottom: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .collapse-section {
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .collapse-header {
+            background: var(--card-bg);
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            border-bottom: 1px solid transparent;
+        }
+
+        .collapse-header.active {
+            border-bottom-color: var(--border-color);
+        }
+
+        .collapse-content {
+            display: none;
+            padding: 15px;
+            background: var(--bg-secondary);
+        }
+
+        .collapse-content.show {
+            display: block;
+        }
+
+        /* Items list */
+        .items-list {
+            margin-top: 10px;
+        }
+
+        .settings-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-item-info {
+            flex: 1;
+        }
+
+        .settings-item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .settings-item-price {
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .settings-item-cost {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .settings-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            min-height: 40px;
+        }
+
+        .edit-btn {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .delete-btn {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Theme selector */
+        .theme-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .theme-btn {
+            flex: 1;
+            min-width: 60px;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .theme-btn.active {
+            border-color: var(--accent-color);
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Share buttons */
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .share-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Net sales table */
+        .net-sales-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .net-sales-table th {
+            text-align: left;
+            padding: 8px 4px;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .net-sales-table td {
+            padding: 6px 4px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .net-sales-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .net-sales-total-row {
+            font-weight: bold;
+            background: var(--card-bg);
+        }
+
+        /* Sales history */
+        .sales-view-toggle {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .view-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .view-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+        .daily-group {
+            margin-bottom: 20px;
+        }
+        .daily-header {
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+        .daily-total {
+            font-size: 14px;
+        }
+
+        .sale-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .sale-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .sale-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sale-delete-icon {
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .sale-qr-icon {
+            cursor: pointer;
+            color: var(--accent-color);
+            font-size: 20px;
+            padding: 5px;
+        }
+
+        .sale-time {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .sale-details table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .sale-details th {
+            text-align: left;
+            padding: 4px 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sale-details td {
+            padding: 4px 0;
+        }
+
+        .sale-details .item-name { text-align: left; }
+        .sale-details .item-qty { text-align: center; }
+        .sale-details .item-total { text-align: right; }
+        .sale-details .item-deleted { color: var(--danger-color); font-style: italic; }
+
+        .sale-payment {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        .sale-total {
+            text-align: right;
+            font-size: 16px;
+            color: var(--success-color);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .sale-discount {
+            color: var(--warning-color);
+            font-size: 13px;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            color: var(--text-primary);
+        }
+
+        /* Delete sale modal */
+        .delete-items-list {
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .delete-item-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .delete-item-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Export textarea */
+        .export-text {
+            width: 100%;
+            height: 200px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-top: 60px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        .items-section {
+            flex: 1;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 12px;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+        }
+
+        .items-section h2 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .item-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: var(--text-primary);
+        }
+
+        .item-card:active {
+            transform: scale(0.98);
+        }
+
+        .bill-section {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            max-height: 45vh;
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .bill-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .delete-bill-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            min-height: 44px;
+        }
+
+        .qr-icon {
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+        }
+
+        .qr-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: currentColor;
+            fill: currentColor;
+        }
+
+        .bill-items {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            max-height: 200px;
+        }
+
+        .bill-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .bill-totals {
+            border-top: 2px solid var(--border-color);
+            padding-top: 10px;
+        }
+
+        .payment-totals {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .grand-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .checkout-btn {
+            margin-top: 10px;
+            padding: 15px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Misc */
+        .no-data {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .price-format {
+            white-space: nowrap;
+        }
+    </style>
+    <script src="qrcode.min.js"></script>
+</head>
+<body class="light">
+    <div class="header">
+        <div class="menu-btn" id="menuBtn">☰</div>
+        <div class="sales-btn" id="salesBtn">📋</div>
+        <h1>POS Pro</h1>
+        <button class="fullscreen-btn" id="fullscreenBtn">⛶</button>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-content" id="sidebarContent"></div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <!-- QR Modal -->
+    <div class="modal" id="qrModal">
+        <div class="modal-content">
+            <img id="qrModalImage" src="" alt="QR Code" style="max-width:100%;">
+            <div id="qrAmountDisplay" style="margin:10px 0; font-weight:bold;"></div>
+            <div id="qrUpiDisplay" style="margin-bottom:10px; color:var(--text-secondary);"></div>
+            <button class="close-modal" id="closeQRBtn" style="padding:12px; background:var(--accent-color); color:white; border:none; border-radius:5px; width:100%;">Close</button>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Select Payment</h3>
+                <span class="discount-icon" id="discountIcon" style="font-size:24px; cursor:pointer;">🏷️</span>
+            </div>
+            <div class="payment-options" style="display:flex; gap:10px; margin:15px 0; flex-wrap:wrap;">
+                <div class="payment-option cash" id="cashOption" onclick="selectPayment('cash')" style="flex:1; min-width:80px; padding:15px; border:2px solid var(--border-color); border-radius:10px; text-align:center; cursor:pointer;">💵 Cash</div>
+                <div class="payment-option upi" id="upiOption" onclick="selectPayment('upi')" style="flex:1; min-width:80px; padding:15px; border:2px solid var(--border-color); border-radius:10px; text-align:center; cursor:pointer;">📱 UPI</div>
+                <div class="payment-option" id="bothOption" onclick="selectPayment('both')" style="flex:1; min-width:80px; padding:15px; border:2px solid var(--border-color); border-radius:10px; text-align:center; cursor:pointer;">🔄 Both</div>
+            </div>
+            <div id="splitPaymentSection" style="display:none; margin-top:15px;">
+                <h4>Split Payment</h4>
+                <p>Total: <span id="splitTotalDisplay">₹0</span></p>
+                <input type="number" id="upiAmount" class="split-input" placeholder="UPI amount" style="width:100%; padding:12px; margin:10px 0; border:1px solid var(--border-color); border-radius:5px;">
+                <div style="display:flex; gap:10px;">
+                    <button class="split-btn primary" onclick="generateSplitQR()" style="flex:1; padding:12px; background:var(--success-color); color:white; border:none; border-radius:5px;">Generate QR</button>
+                    <button class="split-btn secondary" onclick="confirmSplitPayment()" style="flex:1; padding:12px; background:var(--text-secondary); color:white; border:none; border-radius:5px;">Confirm Split</button>
+                </div>
+            </div>
+            <div id="qrDisplaySection" style="display:none; text-align:center; margin:15px 0;">
+                <img id="paymentQRImage" src="" style="max-width:200px; margin:10px auto;">
+                <p id="paymentQRInfo"></p>
+                <button class="done-btn" onclick="completeUpiPayment()" style="width:100%; padding:15px; background:var(--success-color); color:white; border:none; border-radius:5px; margin-top:10px;">Done</button>
+            </div>
+            <div id="paymentSummary" style="display:none; margin-top:15px; padding:15px; background:var(--card-bg); border-radius:5px;">
+                <h4>Payment Summary</h4>
+                <div style="display:flex; justify-content:space-between;"><span>Cash:</span> <span id="summaryCash">₹0</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>UPI:</span> <span id="summaryUpi">₹0</span></div>
+                <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>Total:</span> <span id="summaryTotal">₹0</span></div>
+                <button class="done-btn" onclick="completePayment()" style="width:100%; padding:15px; background:var(--success-color); color:white; border:none; border-radius:5px; margin-top:10px;">Complete Payment</button>
+            </div>
+            <button class="close-modal" onclick="closePaymentModal()" style="width:100%; padding:12px; margin-top:10px; background:var(--text-secondary); color:white; border:none; border-radius:5px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Discount Modal -->
+    <div class="modal" id="discountModal">
+        <div class="modal-content">
+            <h3>Apply Discount</h3>
+            <div id="discountBillPreview" style="max-height:150px; overflow-y:auto; margin:10px 0; padding:10px; background:var(--card-bg); border-radius:5px;"></div>
+            <div class="form-group">
+                <label>Discount Amount (₹)</label>
+                <input type="number" id="discountAmount" class="split-input" placeholder="Enter discount" min="0" step="0.01" style="width:100%; padding:12px; margin:5px 0; border:1px solid var(--border-color); border-radius:5px;">
+            </div>
+            <div style="margin:10px 0;">New Total: <span id="newTotal">₹0</span></div>
+            <button class="save-item-btn" onclick="applyDiscount()" style="width:100%; padding:15px; background:var(--success-color); color:white; border:none; border-radius:5px;">Apply</button>
+            <button class="close-modal" onclick="closeDiscountModal()" style="width:100%; padding:12px; margin-top:10px; background:var(--text-secondary); color:white; border:none; border-radius:5px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Delete Sale Modal -->
+    <div class="modal" id="deleteSaleModal">
+        <div class="modal-content">
+            <h3>Modify Sale</h3>
+            <div style="margin:15px 0;">
+                <button onclick="deleteEntireSale()" style="width:100%; padding:15px; background:var(--danger-color); color:white; border:none; border-radius:5px; margin-bottom:10px;">Delete Entire Bill</button>
+                <button onclick="toggleItemSelectionMode()" style="width:100%; padding:15px; background:var(--warning-color); color:white; border:none; border-radius:5px;">Select Items to Modify</button>
+            </div>
+            <div id="itemSelectionPanel" style="display:none;">
+                <h4>Select items to delete (count becomes 0)</h4>
+                <div id="deleteItemsList" class="delete-items-list"></div>
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <button onclick="applyItemDeletions()" style="flex:1; padding:12px; background:var(--success-color); color:white; border:none; border-radius:5px;">Apply</button>
+                    <button onclick="cancelItemSelection()" style="flex:1; padding:12px; background:var(--text-secondary); color:white; border:none; border-radius:5px;">Cancel</button>
+                </div>
+            </div>
+            <button class="close-modal" onclick="closeDeleteSaleModal()" style="width:100%; padding:12px; margin-top:10px; background:var(--text-secondary); color:white; border:none; border-radius:5px;">Close</button>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <h3>Export Data</h3>
+            <textarea id="exportText" class="export-text" readonly></textarea>
+            <div class="share-buttons">
+                <button class="share-btn" onclick="copyExport()">📋 Copy</button>
+                <button class="share-btn" onclick="downloadExport()">⬇️ Download</button>
+            </div>
+            <button class="close-modal" onclick="closeExportModal()" style="width:100%; padding:12px; margin-top:10px; background:var(--text-secondary); color:white; border:none; border-radius:5px;">Close</button>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h3>Edit Item</h3>
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" id="editItemName" style="width:100%; padding:12px; margin:5px 0; border:1px solid var(--border-color); border-radius:5px;">
+            </div>
+            <div class="form-group">
+                <label>Selling Price (₹)</label>
+                <input type="number" id="editItemPrice" min="0" step="0.01" style="width:100%; padding:12px; margin:5px 0; border:1px solid var(--border-color); border-radius:5px;">
+            </div>
+            <div class="form-group">
+                <label>Cost Price (₹)</label>
+                <input type="number" id="editItemCost" min="0" step="0.01" style="width:100%; padding:12px; margin:5px 0; border:1px solid var(--border-color); border-radius:5px;">
+            </div>
+            <button class="save-item-btn" id="saveEditBtn" style="width:100%; padding:15px; background:var(--success-color); color:white; border:none; border-radius:5px;">Save</button>
+            <button class="close-modal" id="cancelEditBtn" style="width:100%; padding:12px; margin-top:10px; background:var(--text-secondary); color:white; border:none; border-radius:5px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="items-section">
+            <h2>Available Items</h2>
+            <div class="items-grid" id="itemsGrid"></div>
+        </div>
+
+        <div class="bill-section">
+            <div class="bill-header">
+                <h2>Current Bill</h2>
+                <div class="bill-actions">
+                    <button class="delete-bill-btn" id="deleteBillBtn">🗑️ Bill</button>
+                    <div class="qr-icon" id="qrIcon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 7V2h5m10 0h5v5M2 17v5h5" stroke="currentColor" stroke-width="2"/>
+                            <rect x="4" y="4" width="1" height="1" fill="currentColor"/>
+                            <rect x="19" y="4" width="1" height="1" fill="currentColor"/>
+                            <rect x="4" y="19" width="1" height="1" fill="currentColor"/>
+                            <rect x="10" y="2" width="4" height="2" fill="currentColor"/>
+                            <rect x="2" y="10" width="2" height="4" fill="currentColor"/>
+                            <rect x="10" y="10" width="4" height="4" fill="currentColor"/>
+                            <rect x="17" y="10" width="5" height="2" fill="currentColor"/>
+                            <rect x="10" y="17" width="2" height="5" fill="currentColor"/>
+                            <rect x="17" y="17" width="5" height="5" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bill-items" id="billItems">
+                <div class="empty-bill">No items added</div>
+            </div>
+            <div class="bill-totals">
+                <div class="payment-totals">
+                    <span class="cash-total" id="cashTotalDisplay">Cash: ₹0</span>
+                    <span class="upi-total" id="upiTotalDisplay">UPI: ₹0</span>
+                </div>
+                <div class="grand-total">
+                    <span>Total:</span>
+                    <span class="total-amount" id="totalAmount">₹0</span>
+                </div>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">Checkout</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATA ====================
+        let items = [];
+        let bill = [];
+        let sales = [];
+        let nextItemId = 1;
+        let nextSaleId = 1;
+        let qrCodeDataURL = null;
+        let upiId = '';
+        let currentEditItemId = null;
+        let currentSaleForDelete = null;
+        let itemSelectionMode = false;
+
+        // Payment state
+        let currentPaymentMethod = null;
+        let cashTotal = 0;
+        let upiTotal = 0;
+        let discountAmount = 0;
+        let originalTotal = 0;
+
+        // Sales view mode
+        let salesViewMode = 'all'; // 'all' or 'daily'
+
+        // DOM elements
+        const menuBtn = document.getElementById('menuBtn');
+        const salesBtn = document.getElementById('salesBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarContent = document.getElementById('sidebarContent');
+        const overlay = document.getElementById('overlay');
+        const qrIcon = document.getElementById('qrIcon');
+        const qrModal = document.getElementById('qrModal');
+        const qrModalImage = document.getElementById('qrModalImage');
+        const qrAmountDisplay = document.getElementById('qrAmountDisplay');
+        const qrUpiDisplay = document.getElementById('qrUpiDisplay');
+        const closeQRBtn = document.getElementById('closeQRBtn');
+        const editModal = document.getElementById('editModal');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const deleteBillBtn = document.getElementById('deleteBillBtn');
+        const paymentModal = document.getElementById('paymentModal');
+        const discountModal = document.getElementById('discountModal');
+        const discountIcon = document.getElementById('discountIcon');
+        const cashTotalDisplay = document.getElementById('cashTotalDisplay');
+        const upiTotalDisplay = document.getElementById('upiTotalDisplay');
+        const deleteSaleModal = document.getElementById('deleteSaleModal');
+        const exportModal = document.getElementById('exportModal');
+        const exportText = document.getElementById('exportText');
+
+        // ==================== UTILS ====================
+        function formatPrice(price) {
+            return Number.isInteger(price) ? `₹${price}` : `₹${price.toFixed(2)}`;
+        }
+
+        function loadData() {
+            const savedItems = localStorage.getItem('pos_items');
+            const savedSales = localStorage.getItem('pos_sales');
+            const savedQR = localStorage.getItem('pos_qr');
+            const savedUpiId = localStorage.getItem('pos_upi_id');
+            const savedNextItemId = localStorage.getItem('pos_nextItemId');
+            const savedNextSaleId = localStorage.getItem('pos_nextSaleId');
+            const savedTheme = localStorage.getItem('pos_theme');
+            const savedViewMode = localStorage.getItem('pos_salesViewMode');
+
+            if (savedItems) items = JSON.parse(savedItems);
+            if (savedSales) sales = JSON.parse(savedSales);
+            if (savedQR) qrCodeDataURL = savedQR;
+            if (savedUpiId) upiId = savedUpiId;
+            if (savedNextItemId) nextItemId = parseInt(savedNextItemId);
+            if (savedNextSaleId) nextSaleId = parseInt(savedNextSaleId);
+            if (savedTheme) document.body.className = savedTheme;
+            if (savedViewMode) salesViewMode = savedViewMode;
+            
+            if (items.length > 0) {
+                const maxId = Math.max(...items.map(i => i.id));
+                if (maxId >= nextItemId) nextItemId = maxId + 1;
+            }
+            updateQRVisibility();
+        }
+
+        function saveData() {
+            localStorage.setItem('pos_items', JSON.stringify(items));
+            localStorage.setItem('pos_sales', JSON.stringify(sales));
+            localStorage.setItem('pos_qr', qrCodeDataURL || '');
+            localStorage.setItem('pos_upi_id', upiId);
+            localStorage.setItem('pos_nextItemId', nextItemId);
+            localStorage.setItem('pos_nextSaleId', nextSaleId);
+            localStorage.setItem('pos_theme', document.body.className);
+            localStorage.setItem('pos_salesViewMode', salesViewMode);
+        }
+
+        function updateQRVisibility() {
+            qrIcon.style.display = (upiId || qrCodeDataURL) ? 'flex' : 'none';
+        }
+
+        // ==================== SIDEBAR ====================
+        function openSettings() {
+            renderSettings();
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function openSales() {
+            renderSales();
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        function showNetSales() {
+            renderNetSales();
+        }
+
+        // ==================== RENDER SETTINGS ====================
+        function renderSettings() {
+            let itemsListHTML = '';
+            if (items.length === 0) {
+                itemsListHTML = '<p class="no-data">No items added yet</p>';
+            } else {
+                itemsListHTML = items.map(item => `
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <div class="settings-item-name">${item.name}</div>
+                            <div class="settings-item-price">Sell: ${formatPrice(item.price)}</div>
+                            <div class="settings-item-cost">Cost: ${formatPrice(item.costPrice || 0)}</div>
+                        </div>
+                        <div class="settings-item-actions">
+                            <button class="edit-btn" onclick="openEditModal(${item.id})">Edit</button>
+                            <button class="delete-btn" onclick="deleteItem(${item.id})">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const currentTheme = document.body.className;
+            const themes = ['light', 'dark', 'blue', 'green', 'purple'];
+            const themeButtons = themes.map(t => 
+                `<div class="theme-btn ${t === currentTheme ? 'active' : ''}" onclick="setTheme('${t}')">${t.charAt(0).toUpperCase() + t.slice(1)}</div>`
+            ).join('');
+
+            sidebarContent.innerHTML = `
+                <div class="sidebar-header">
+                    <h2>Settings</h2>
+                    <div class="header-buttons">
+                        <button class="net-sales-btn" onclick="showNetSales()">📊 Net Sales</button>
+                        <button class="back-btn" onclick="closeSidebar()"><span>←</span> Back</button>
+                    </div>
+                </div>
+
+                <button class="action-btn" onclick="toggleCollapse('addItemCollapse')">➕ Add New Item</button>
+                <div id="addItemCollapse" class="collapse-content" style="display:none;">
+                    <div class="form-group">
+                        <label>Item Name</label>
+                        <input type="text" id="itemName" placeholder="e.g., Coffee" style="width:100%; padding:12px; margin:5px 0; border:1px solid var(--border-color); border-radius:5px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Selling Price (₹)</label>
+                        <input type="number" id="itemPrice" placeholder="0" min="0" step="0.01" style="width:100%; padding:12px; margin:5px 0; border:1px solid var(--border-color); border-radius:5px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Cost Price (₹)</label>
+                        <input type="number" id="itemCost" placeholder="0" min="0" step="0.01" style="width:100%; padding:12px; margin:5px 0; border:1px solid var(--border-color); border-radius:5px;">
+                    </div>
+                    <button class="save-item-btn" onclick="addNewItem()" style="width:100%; padding:15px; background:var(--success-color); color:white; border:none; border-radius:5px;">Add Item</button>
+                </div>
+
+                <button class="action-btn" onclick="toggleCollapse('manageItemsCollapse')">📋 Manage Items</button>
+                <div id="manageItemsCollapse" class="collapse-content" style="display:none;">
+                    <div class="items-list">${itemsListHTML}</div>
+                </div>
+
+                <button class="action-btn" onclick="toggleCollapse('upiCollapse')">📱 UPI Settings</button>
+                <div id="upiCollapse" class="collapse-content" style="display:none;">
+                    <div class="upi-section">
+                        <input type="text" class="upi-input" id="upiIdInput" placeholder="e.g., merchant@okhdfcbank" value="${upiId}" style="width:100%; padding:12px; margin:5px 0; border:1px solid var(--border-color); border-radius:5px;">
+                        <button class="save-item-btn" onclick="saveUpiId()" style="width:100%; padding:15px; background:var(--success-color); color:white; border:none; border-radius:5px;">Save UPI ID</button>
+                    </div>
+                </div>
+
+                <button class="action-btn" onclick="toggleCollapse('qrCollapse')">📸 Static QR</button>
+                <div id="qrCollapse" class="collapse-content" style="display:none;">
+                    <div class="qr-upload-section">
+                        <input type="file" id="qrUpload" accept="image/*" style="display:none;" onchange="handleQRUpload(event)">
+                        <button class="upload-btn" onclick="document.getElementById('qrUpload').click()" style="width:100%; padding:15px; background:var(--accent-color); color:white; border:none; border-radius:5px;">Choose Image</button>
+                        ${qrCodeDataURL ? '<button class="remove-btn" onclick="removeQR()" style="width:100%; padding:15px; margin-top:10px; background:var(--danger-color); color:white; border:none; border-radius:5px;">Remove QR</button>' : ''}
+                        <div class="qr-preview" id="qrPreview" style="margin-top:10px;">
+                            ${qrCodeDataURL ? `<img src="${qrCodeDataURL}" style="max-width:150px;">` : 'No QR uploaded'}
+                        </div>
+                    </div>
+                </div>
+
+                <button class="action-btn" onclick="toggleCollapse('themeCollapse')">🎨 Themes</button>
+                <div id="themeCollapse" class="collapse-content" style="display:none;">
+                    <div class="theme-buttons">${themeButtons}</div>
+                </div>
+
+                <button class="action-btn" onclick="openExportModal()">📤 Export Data</button>
+            `;
+        }
+
+        function toggleCollapse(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'none' || el.style.display === '') {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        }
+
+        function setTheme(theme) {
+            document.body.className = theme;
+            saveData();
+            renderSettings(); // refresh to update active state
+        }
+
+        // ==================== NET SALES ====================
+        function renderNetSales() {
+            const itemStats = {};
+            let totalAmount = 0, totalProfit = 0, totalCount = 0, totalDiscount = 0;
+
+            sales.forEach(sale => {
+                totalDiscount += sale.discount || 0;
+                sale.items.forEach(item => {
+                    if (!item.deleted) {
+                        if (!itemStats[item.id]) {
+                            const originalItem = items.find(i => i.id === item.id) || { name: item.name, costPrice: 0 };
+                            itemStats[item.id] = {
+                                name: item.name,
+                                price: item.price,
+                                costPrice: originalItem.costPrice || 0,
+                                quantity: 0,
+                                total: 0
+                            };
+                        }
+                        itemStats[item.id].quantity += item.quantity;
+                        itemStats[item.id].total += item.price * item.quantity;
+                    }
+                });
+            });
+
+            let rows = '';
+            for (let id in itemStats) {
+                const stat = itemStats[id];
+                const profit = stat.total - (stat.costPrice * stat.quantity);
+                totalAmount += stat.total;
+                totalProfit += profit;
+                totalCount += stat.quantity;
+                rows += `<tr>
+                    <td>${stat.name}</td>
+                    <td>${formatPrice(stat.price)}</td>
+                    <td>${stat.quantity}</td>
+                    <td>${formatPrice(stat.total)}</td>
+                    <td>${formatPrice(profit)}</td>
+                </tr>`;
+            }
+
+            sidebarContent.innerHTML = `
+                <div class="sidebar-header">
+                    <h2>Net Sales</h2>
+                    <button class="back-btn" onclick="renderSettings()"><span>←</span> Back</button>
+                </div>
+                <table class="net-sales-table">
+                    <thead>
+                        <tr><th>Item</th><th>Price</th><th>Count</th><th>Amount</th><th>Profit</th></tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                        <tr class="net-sales-total-row">
+                            <td colspan="2"><strong>Totals</strong></td>
+                            <td><strong>${totalCount}</strong></td>
+                            <td><strong>${formatPrice(totalAmount)}</strong></td>
+                            <td><strong>${formatPrice(totalProfit)}</strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" style="color:var(--warning-color);">Total Discount Given: ${formatPrice(totalDiscount)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // ==================== SALES HISTORY ====================
+        function renderSales() {
+            let totalCash = 0, totalUpi = 0, totalSalesAmount = 0, totalDiscount = 0;
+            sales.forEach(s => {
+                totalCash += s.cashTotal || 0;
+                totalUpi += s.upiTotal || 0;
+                totalSalesAmount += s.total;
+                totalDiscount += s.discount || 0;
+            });
+
+            let html = `
+                <div class="sidebar-header">
+                    <h2>Sales History</h2>
+                    <button class="back-btn" onclick="closeSidebar()"><span>←</span> Back</button>
+                </div>
+                <div class="sales-summary" style="background:var(--header-bg); color:white; padding:15px; border-radius:8px; margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between;"><span>Total Sales:</span> <span>${formatPrice(totalSalesAmount)}</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Total Cash:</span> <span>${formatPrice(totalCash)}</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Total UPI:</span> <span>${formatPrice(totalUpi)}</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Total Discount:</span> <span>${formatPrice(totalDiscount)}</span></div>
+                </div>
+                <div class="sales-view-toggle">
+                    <button class="view-btn ${salesViewMode === 'all' ? 'active' : ''}" onclick="setSalesView('all')">All Sales</button>
+                    <button class="view-btn ${salesViewMode === 'daily' ? 'active' : ''}" onclick="setSalesView('daily')">Daily</button>
+                </div>
+            `;
+
+            if (sales.length === 0) {
+                html += '<div class="no-data">No sales yet</div>';
+                sidebarContent.innerHTML = html;
+                return;
+            }
+
+            if (salesViewMode === 'all') {
+                html += '<ul class="sales-list">';
+                [...sales].reverse().forEach(sale => {
+                    html += renderSaleItem(sale);
+                });
+                html += '</ul>';
+            } else {
+                const grouped = groupSalesByDay(sales);
+                const sortedDates = Object.keys(grouped).sort((a,b) => new Date(b) - new Date(a));
+                sortedDates.forEach(dateStr => {
+                    const daySales = grouped[dateStr];
+                    const dayTotal = daySales.reduce((sum, s) => sum + s.total, 0);
+                    const displayDate = formatDateHeader(dateStr);
+                    html += `
+                        <div class="daily-group">
+                            <div class="daily-header">
+                                <span>${displayDate}</span>
+                                <span class="daily-total">Total: ${formatPrice(dayTotal)}</span>
+                            </div>
+                            <ul class="sales-list" style="margin-top:5px;">
+                                ${daySales.map(sale => renderSaleItem(sale)).join('')}
+                            </ul>
+                        </div>
+                    `;
+                });
+            }
+
+            sidebarContent.innerHTML = html;
+        }
+
+        function renderSaleItem(sale) {
+            const date = new Date(sale.timestamp);
+            const timeStr = date.toLocaleString();
+            let itemsHTML = '';
+            sale.items.forEach(item => {
+                const deletedClass = item.deleted ? 'item-deleted' : '';
+                const displayQty = item.deleted ? 'deleted' : item.quantity;
+                itemsHTML += `<tr>
+                    <td class="item-name ${deletedClass}">${item.name}</td>
+                    <td class="item-qty">${displayQty}</td>
+                    <td class="item-total">${item.deleted ? '—' : formatPrice(item.price * item.quantity)}</td>
+                </tr>`;
+            });
+
+            return `
+                <li class="sale-item">
+                    <div class="sale-header">
+                        <div class="sale-header-left">
+                            <span>Sale #${sale.id}</span>
+                            <span class="sale-qr-icon" onclick="showQRForSale(${sale.id})">📱</span>
+                            <span class="sale-delete-icon" onclick="openDeleteSaleModal(${sale.id})">🗑️</span>
+                        </div>
+                        <span class="sale-time">${timeStr}</span>
+                    </div>
+                    <div class="sale-details">
+                        <table>
+                            <thead><tr><th>Item</th><th>Count</th><th>Total</th></tr></thead>
+                            <tbody>${itemsHTML}</tbody>
+                        </table>
+                    </div>
+                    <div class="sale-payment">
+                        <span>Cash: ${formatPrice(sale.cashTotal || 0)}</span>
+                        <span>UPI: ${formatPrice(sale.upiTotal || 0)}</span>
+                    </div>
+                    ${sale.discount ? `<div class="sale-discount">Discount: -${formatPrice(sale.discount)}</div>` : ''}
+                    <div class="sale-total">Total: ${formatPrice(sale.total)}</div>
+                </li>
+            `;
+        }
+
+        function groupSalesByDay(salesArray) {
+            const groups = {};
+            salesArray.forEach(sale => {
+                const d = new Date(sale.timestamp);
+                const dateKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                if (!groups[dateKey]) groups[dateKey] = [];
+                groups[dateKey].push(sale);
+            });
+            return groups;
+        }
+
+        function formatDateHeader(dateStr) {
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+
+            if (dateStr === todayStr) return 'Today';
+            if (dateStr === yesterdayStr) return 'Yesterday';
+            const d = new Date(dateStr + 'T12:00:00');
+            return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function setSalesView(mode) {
+            salesViewMode = mode;
+            saveData();
+            renderSales();
+        }
+
+        // ==================== DELETE SALE MODAL ====================
+        function openDeleteSaleModal(saleId) {
+            currentSaleForDelete = sales.find(s => s.id === saleId);
+            if (!currentSaleForDelete) return;
+            document.getElementById('itemSelectionPanel').style.display = 'none';
+            deleteSaleModal.classList.add('active');
+        }
+
+        function closeDeleteSaleModal() {
+            deleteSaleModal.classList.remove('active');
+            currentSaleForDelete = null;
+            itemSelectionMode = false;
+        }
+
+        function deleteEntireSale() {
+            if (!currentSaleForDelete) return;
+            if (confirm('Delete this entire sale?')) {
+                sales = sales.filter(s => s.id !== currentSaleForDelete.id);
+                saveData();
+                renderSales(); // refresh if sidebar open
+                closeDeleteSaleModal();
+            }
+        }
+
+        function toggleItemSelectionMode() {
+            itemSelectionMode = true;
+            const panel = document.getElementById('itemSelectionPanel');
+            panel.style.display = 'block';
+            const listDiv = document.getElementById('deleteItemsList');
+            let html = '';
+            currentSaleForDelete.items.forEach((item, index) => {
+                html += `
+                    <div class="delete-item-row">
+                        <input type="checkbox" id="del_${index}" ${item.deleted ? '' : 'checked'}>
+                        <label for="del_${index}">${item.name} (x${item.quantity})</label>
+                    </div>
+                `;
+            });
+            listDiv.innerHTML = html;
+        }
+
+        function applyItemDeletions() {
+            const checkboxes = document.querySelectorAll('#deleteItemsList input[type="checkbox"]');
+            const updatedItems = currentSaleForDelete.items.map((item, idx) => {
+                const checked = checkboxes[idx] ? checkboxes[idx].checked : false;
+                return { ...item, deleted: !checked }; // if unchecked, mark deleted
+            });
+            let newTotal = 0;
+            updatedItems.forEach(item => {
+                if (!item.deleted) newTotal += item.price * item.quantity;
+            });
+            const saleIndex = sales.findIndex(s => s.id === currentSaleForDelete.id);
+            if (saleIndex !== -1) {
+                sales[saleIndex].items = updatedItems;
+                sales[saleIndex].total = newTotal;
+                saveData();
+                renderSales();
+            }
+            cancelItemSelection();
+        }
+
+        function cancelItemSelection() {
+            document.getElementById('itemSelectionPanel').style.display = 'none';
+        }
+
+        // ==================== EXPORT ====================
+        function openExportModal() {
+            const data = {
+                items,
+                sales,
+                upiId,
+                exportDate: new Date().toISOString()
+            };
+            exportText.value = JSON.stringify(data, null, 2);
+            exportModal.classList.add('active');
+        }
+
+        function closeExportModal() {
+            exportModal.classList.remove('active');
+        }
+
+        function copyExport() {
+            exportText.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard');
+        }
+
+        function downloadExport() {
+            const blob = new Blob([exportText.value], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pos_backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ==================== ITEM FUNCTIONS ====================
+        function addNewItem() {
+            const name = document.getElementById('itemName').value.trim();
+            const price = parseFloat(document.getElementById('itemPrice').value);
+            const cost = parseFloat(document.getElementById('itemCost').value) || 0;
+            if (name && !isNaN(price) && price > 0) {
+                items.push({ id: nextItemId++, name, price, costPrice: cost });
+                renderItems();
+                renderSettings();
+                saveData();
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemPrice').value = '';
+                document.getElementById('itemCost').value = '';
+            } else {
+                alert('Please enter valid name and selling price');
+            }
+        }
+
+        function openEditModal(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (item) {
+                currentEditItemId = itemId;
+                document.getElementById('editItemName').value = item.name;
+                document.getElementById('editItemPrice').value = item.price;
+                document.getElementById('editItemCost').value = item.costPrice || 0;
+                editModal.classList.add('active');
+            }
+        }
+
+        function saveEditedItem() {
+            if (!currentEditItemId) return;
+            const name = document.getElementById('editItemName').value.trim();
+            const price = parseFloat(document.getElementById('editItemPrice').value);
+            const cost = parseFloat(document.getElementById('editItemCost').value) || 0;
+            if (name && !isNaN(price) && price > 0) {
+                const idx = items.findIndex(i => i.id === currentEditItemId);
+                if (idx !== -1) {
+                    items[idx].name = name;
+                    items[idx].price = price;
+                    items[idx].costPrice = cost;
+                    renderItems();
+                    renderSettings();
+                    saveData();
+                    closeEditModal();
+                }
+            } else {
+                alert('Please enter valid data');
+            }
+        }
+
+        function deleteItem(itemId) {
+            if (confirm('Delete this item?')) {
+                items = items.filter(i => i.id !== itemId);
+                bill = bill.filter(i => i.id !== itemId);
+                renderItems();
+                renderBill();
+                renderSettings();
+                saveData();
+            }
+        }
+
+        function closeEditModal() {
+            editModal.classList.remove('active');
+            currentEditItemId = null;
+        }
+
+        // ==================== BILL FUNCTIONS ====================
+        function addToBill(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+            const existing = bill.find(b => b.id === itemId);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                bill.push({ id: item.id, name: item.name, price: item.price, quantity: 1 });
+            }
+            renderBill();
+        }
+
+        function updateBillItemQuantity(itemId, change) {
+            const idx = bill.findIndex(b => b.id === itemId);
+            if (idx === -1) return;
+            if (change > 0) {
+                bill[idx].quantity++;
+            } else {
+                if (bill[idx].quantity > 1) {
+                    bill[idx].quantity--;
+                } else {
+                    bill.splice(idx, 1);
+                }
+            }
+            renderBill();
+        }
+
+        function removeFromBill(itemId) {
+            bill = bill.filter(b => b.id !== itemId);
+            renderBill();
+        }
+
+        function deleteEntireBill() {
+            if (bill.length === 0) return;
+            if (confirm('Clear entire bill?')) {
+                bill = [];
+                renderBill();
+            }
+        }
+
+        function calculateTotal() {
+            return bill.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        }
+
+        function renderItems() {
+            const grid = document.getElementById('itemsGrid');
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="no-data">No items</div>';
+                return;
+            }
+            grid.innerHTML = items.map(item => `
+                <div class="item-card" onclick="addToBill(${item.id})">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-price">${formatPrice(item.price)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderBill() {
+            const billDiv = document.getElementById('billItems');
+            const totalSpan = document.getElementById('totalAmount');
+            if (bill.length === 0) {
+                billDiv.innerHTML = '<div class="empty-bill">No items</div>';
+                totalSpan.textContent = '₹0';
+                cashTotalDisplay.textContent = 'Cash: ₹0';
+                upiTotalDisplay.textContent = 'UPI: ₹0';
+                return;
+            }
+            let html = '';
+            bill.forEach(item => {
+                html += `
+                    <div class="bill-item">
+                        <div class="bill-item-info">
+                            <div class="bill-item-name">${item.name}</div>
+                            <div class="bill-item-details">${formatPrice(item.price)}</div>
+                        </div>
+                        <div class="bill-item-actions">
+                            <button class="remove-btn" onclick="updateBillItemQuantity(${item.id}, -1)">−</button>
+                            <span>${item.quantity}</span>
+                            <button class="add-btn" onclick="updateBillItemQuantity(${item.id}, 1)">+</button>
+                            <button class="remove-btn" onclick="removeFromBill(${item.id})">×</button>
+                        </div>
+                    </div>
+                `;
+            });
+            billDiv.innerHTML = html;
+            const total = calculateTotal() - discountAmount;
+            totalSpan.textContent = formatPrice(total);
+            cashTotal = 0; upiTotal = 0;
+            updatePaymentDisplays();
+        }
+
+        function updatePaymentDisplays() {
+            cashTotalDisplay.textContent = `Cash: ${formatPrice(cashTotal)}`;
+            upiTotalDisplay.textContent = `UPI: ${formatPrice(upiTotal)}`;
+        }
+
+        // ==================== QR FUNCTIONS ====================
+        async function showQRModal() {
+            if (!upiId) {
+                if (qrCodeDataURL) {
+                    qrModalImage.src = qrCodeDataURL;
+                    qrAmountDisplay.textContent = 'Static QR Code';
+                    qrUpiDisplay.textContent = '';
+                    qrModal.classList.add('active');
+                } else {
+                    alert('Please set UPI ID or upload static QR');
+                }
+                return;
+            }
+            const upiUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=POS%20Merchant&cu=INR`;
+            try {
+                const qrDataUrl = await QRCode.toDataURL(upiUrl, { width: 300 });
+                qrModalImage.src = qrDataUrl;
+                qrAmountDisplay.textContent = 'UPI QR (No amount)';
+                qrUpiDisplay.textContent = upiId;
+                qrModal.classList.add('active');
+            } catch (e) {
+                alert('Error generating QR');
+            }
+        }
+
+        async function showQRModalWithAmount(amount, label = '') {
+            if (!upiId) {
+                if (qrCodeDataURL) {
+                    qrModalImage.src = qrCodeDataURL;
+                    qrAmountDisplay.textContent = `Amount: ${formatPrice(amount)} (static)`;
+                    qrUpiDisplay.textContent = '';
+                    qrModal.classList.add('active');
+                } else {
+                    alert('No UPI ID');
+                }
+                return;
+            }
+            const upiUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=POS%20Merchant&am=${amount.toFixed(2)}&cu=INR`;
+            const qrDataUrl = await QRCode.toDataURL(upiUrl, { width: 300 });
+            qrModalImage.src = qrDataUrl;
+            qrAmountDisplay.textContent = label ? `Amount: ${formatPrice(amount)} (${label})` : `Amount: ${formatPrice(amount)}`;
+            qrUpiDisplay.textContent = upiId;
+            qrModal.classList.add('active');
+        }
+
+        function closeQRModal() {
+            qrModal.classList.remove('active');
+        }
+
+        function showQRForSale(saleId) {
+            const sale = sales.find(s => s.id === saleId);
+            if (sale) showQRModalWithAmount(sale.total, `Sale #${sale.id}`);
+        }
+
+        // ==================== PAYMENT ====================
+        function checkout() {
+            if (bill.length === 0) {
+                alert('No items');
+                return;
+            }
+            originalTotal = calculateTotal();
+            discountAmount = 0;
+            currentPaymentMethod = null;
+            cashTotal = 0; upiTotal = 0;
+
+            document.getElementById('cashOption').classList.remove('selected');
+            document.getElementById('upiOption').classList.remove('selected');
+            document.getElementById('bothOption').classList.remove('selected');
+            document.getElementById('splitPaymentSection').style.display = 'none';
+            document.getElementById('qrDisplaySection').style.display = 'none';
+            document.getElementById('paymentSummary').style.display = 'none';
+            document.getElementById('splitTotalDisplay').textContent = formatPrice(originalTotal);
+            document.getElementById('upiAmount').value = '';
+
+            paymentModal.classList.add('active');
+        }
+
+        function selectPayment(method) {
+            currentPaymentMethod = method;
+            document.getElementById('cashOption').classList.remove('selected');
+            document.getElementById('upiOption').classList.remove('selected');
+            document.getElementById('bothOption').classList.remove('selected');
+            document.getElementById(method === 'cash' ? 'cashOption' : method === 'upi' ? 'upiOption' : 'bothOption').classList.add('selected');
+
+            document.getElementById('splitPaymentSection').style.display = method === 'both' ? 'block' : 'none';
+            document.getElementById('qrDisplaySection').style.display = 'none';
+            document.getElementById('paymentSummary').style.display = 'none';
+
+            if (method === 'cash') {
+                cashTotal = originalTotal - discountAmount;
+                upiTotal = 0;
+                showPaymentSummary();
+            } else if (method === 'upi') {
+                cashTotal = 0;
+                upiTotal = originalTotal - discountAmount;
+                showUpiQR(upiTotal);
+            }
+        }
+
+        async function showUpiQR(amount) {
+            if (!upiId && !qrCodeDataURL) {
+                alert('No payment method configured');
+                return;
+            }
+            const qrSection = document.getElementById('qrDisplaySection');
+            const qrImg = document.getElementById('paymentQRImage');
+            const qrInfo = document.getElementById('paymentQRInfo');
+
+            if (upiId) {
+                const upiUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=POS%20Merchant&am=${amount.toFixed(2)}&cu=INR`;
+                const qrDataUrl = await QRCode.toDataURL(upiUrl, { width: 200 });
+                qrImg.src = qrDataUrl;
+                qrInfo.textContent = `Scan to pay ${formatPrice(amount)}`;
+            } else if (qrCodeDataURL) {
+                qrImg.src = qrCodeDataURL;
+                qrInfo.textContent = `Static QR - pay ${formatPrice(amount)} manually`;
+            }
+            qrSection.style.display = 'block';
+        }
+
+        function generateSplitQR() {
+            const upiAmt = parseFloat(document.getElementById('upiAmount').value);
+            if (isNaN(upiAmt) || upiAmt <= 0) {
+                alert('Enter valid amount');
+                return;
+            }
+            const total = originalTotal - discountAmount;
+            if (upiAmt > total) {
+                alert('UPI amount exceeds total');
+                return;
+            }
+            cashTotal = total - upiAmt;
+            upiTotal = upiAmt;
+            showUpiQR(upiAmt);
+        }
+
+        function confirmSplitPayment() {
+            const upiAmt = parseFloat(document.getElementById('upiAmount').value);
+            if (isNaN(upiAmt) || upiAmt <= 0) {
+                alert('Enter valid amount');
+                return;
+            }
+            const total = originalTotal - discountAmount;
+            if (upiAmt > total) {
+                alert('UPI amount exceeds total');
+                return;
+            }
+            cashTotal = total - upiAmt;
+            upiTotal = upiAmt;
+            document.getElementById('splitPaymentSection').style.display = 'none';
+            showPaymentSummary();
+        }
+
+        function showPaymentSummary() {
+            document.getElementById('paymentSummary').style.display = 'block';
+            document.getElementById('summaryCash').textContent = formatPrice(cashTotal);
+            document.getElementById('summaryUpi').textContent = formatPrice(upiTotal);
+            document.getElementById('summaryTotal').textContent = formatPrice(cashTotal + upiTotal);
+        }
+
+        function completeUpiPayment() {
+            completePayment();
+        }
+
+        function completePayment() {
+            const total = originalTotal - discountAmount;
+            if (Math.abs((cashTotal + upiTotal) - total) > 0.01) {
+                alert('Payment mismatch');
+                return;
+            }
+            const sale = {
+                id: nextSaleId++,
+                items: bill.map(item => ({ ...item })),
+                total: total,
+                cashTotal: cashTotal,
+                upiTotal: upiTotal,
+                discount: discountAmount,
+                timestamp: new Date().toISOString()
+            };
+            sales.push(sale);
+            saveData();
+
+            alert(`Sale complete!\nCash: ${formatPrice(cashTotal)}\nUPI: ${formatPrice(upiTotal)}\nTotal: ${formatPrice(total)}`);
+
+            bill = [];
+            discountAmount = 0;
+            renderBill();
+            closePaymentModal();
+        }
+
+        function closePaymentModal() {
+            paymentModal.classList.remove('active');
+        }
+
+        // ==================== DISCOUNT ====================
+        function openDiscountModal() {
+            const preview = document.getElementById('discountBillPreview');
+            let html = '';
+            bill.forEach(item => {
+                html += `<div class="bill-preview-item" style="display:flex; justify-content:space-between;"><span>${item.name} x${item.quantity}</span><span>${formatPrice(item.price * item.quantity)}</span></div>`;
+            });
+            preview.innerHTML = html;
+            document.getElementById('newTotal').textContent = formatPrice(originalTotal - discountAmount);
+            document.getElementById('discountAmount').value = discountAmount;
+            discountModal.classList.add('active');
+        }
+
+        function applyDiscount() {
+            const disc = parseFloat(document.getElementById('discountAmount').value) || 0;
+            if (disc < 0 || disc > originalTotal) {
+                alert('Invalid discount');
+                return;
+            }
+            discountAmount = disc;
+            renderBill();
+            closeDiscountModal();
+        }
+
+        function closeDiscountModal() {
+            discountModal.classList.remove('active');
+        }
+
+        // ==================== QR UPLOAD ====================
+        function handleQRUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    qrCodeDataURL = e.target.result;
+                    saveData();
+                    updateQRVisibility();
+                    renderSettings();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeQR() {
+            qrCodeDataURL = null;
+            saveData();
+            updateQRVisibility();
+            renderSettings();
+        }
+
+        function saveUpiId() {
+            const val = document.getElementById('upiIdInput').value.trim();
+            if (val) {
+                upiId = val;
+                saveData();
+                updateQRVisibility();
+                alert('UPI ID saved');
+            } else {
+                alert('Enter UPI ID');
+            }
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        menuBtn.addEventListener('click', openSettings);
+        salesBtn.addEventListener('click', openSales);
+        overlay.addEventListener('click', closeSidebar);
+        qrIcon.addEventListener('click', showQRModal);
+        closeQRBtn.addEventListener('click', closeQRModal);
+        saveEditBtn.addEventListener('click', saveEditedItem);
+        cancelEditBtn.addEventListener('click', closeEditModal);
+        checkoutBtn.addEventListener('click', checkout);
+        deleteBillBtn.addEventListener('click', deleteEntireBill);
+        discountIcon.addEventListener('click', openDiscountModal);
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Make functions global
+        window.addNewItem = addNewItem;
+        window.openEditModal = openEditModal;
+        window.deleteItem = deleteItem;
+        window.handleQRUpload = handleQRUpload;
+        window.removeQR = removeQR;
+        window.addToBill = addToBill;
+        window.updateBillItemQuantity = updateBillItemQuantity;
+        window.removeFromBill = removeFromBill;
+        window.closeSidebar = closeSidebar;
+        window.selectPayment = selectPayment;
+        window.generateSplitQR = generateSplitQR;
+        window.confirmSplitPayment = confirmSplitPayment;
+        window.completeUpiPayment = completeUpiPayment;
+        window.completePayment = completePayment;
+        window.closePaymentModal = closePaymentModal;
+        window.applyDiscount = applyDiscount;
+        window.closeDiscountModal = closeDiscountModal;
+        window.showQRForSale = showQRForSale;
+        window.showNetSales = showNetSales;
+        window.renderSettings = renderSettings;
+        window.toggleCollapse = toggleCollapse;
+        window.setTheme = setTheme;
+        window.openDeleteSaleModal = openDeleteSaleModal;
+        window.closeDeleteSaleModal = closeDeleteSaleModal;
+        window.deleteEntireSale = deleteEntireSale;
+        window.toggleItemSelectionMode = toggleItemSelectionMode;
+        window.applyItemDeletions = applyItemDeletions;
+        window.cancelItemSelection = cancelItemSelection;
+        window.openExportModal = openExportModal;
+        window.closeExportModal = closeExportModal;
+        window.copyExport = copyExport;
+        window.downloadExport = downloadExport;
+        window.setSalesView = setSalesView;
+
+        // Initialize
+        loadData();
+        renderItems();
+        renderBill();
+    </script>
+</body>
+</html>
